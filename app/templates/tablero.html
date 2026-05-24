@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="contenedor">
+
+    <h1>Gestor de tareas</h1>
+    <form method="GET" class="buscador">
+        <div class="input-busqueda">
+            <span>🔍</span>
+            <input type="text" name="q" placeholder="Buscar tarea..." value="{{ request.args.get('q', '') }}">
+        </div>
+    </form>
+    <div class="acciones">
+        <a href="{{ url_for('main.crear') }}" class="btn">+ Nueva tarea</a>
+        <a href="{{ url_for('main.calendario') }}" class="btn">Calendario</a>
+        <a href="{{ url_for('main.hoy') }}" class="btn">Hoy</a>
+    </div>
+
+    <div class="resumen">
+        <div class="resumen-card">
+            <h3>{{ pendientes|length }}</h3>
+            <p>Pendientes</p>
+        </div>
+
+        <div class="resumen-card">
+            <h3>{{ proceso|length }}</h3>
+            <p>En proceso</p>
+        </div>
+
+        <div class="resumen-card">
+            <h3>{{ completadas|length }}</h3>
+            <p>Completadas</p>
+        </div>
+    </div>
+
+    <div class="filtros">
+        <button onclick="filtrar('Todas')">Todas</button>
+        <button onclick="filtrar('Alta')">Alta</button>
+        <button onclick="filtrar('Media')">Media</button>
+        <button onclick="filtrar('Baja')">Baja</button>
+    </div>
+
+    <div class="columnas">
+
+        <div class="columna">
+            <h2>Pendiente</h2>
+
+            {% for tarea in pendientes %}
+            <div class="card tarea-card prioridad-{{ tarea.prioridad }}"
+                 data-prioridad="{{ tarea.prioridad }}"
+                 {% if tarea.fecha_limite < today %}style="border-left: 5px solid red;"{% endif %}>
+
+                <h3>{{ tarea.titulo }}</h3>
+                <p>{{ tarea.descripcion }}</p>
+                <p><strong>Prioridad:</strong> {{ tarea.prioridad }}</p>
+                <p><strong>Fecha:</strong> {{ tarea.fecha_limite }}</p>
+
+                {% if tarea.fecha_limite < today %}
+                <p style="color:red;"><strong>Vencida</strong></p>
+                {% endif %}
+
+                <a href="{{ url_for('main.cambiar_estado', id=tarea.id, nuevo='En proceso') }}">Mover</a>
+                <a href="{{ url_for('main.editar', id=tarea.id) }}">Editar</a>
+                <a href="{{ url_for('main.eliminar', id=tarea.id) }}">Eliminar</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="columna">
+            <h2>En proceso</h2>
+
+            {% for tarea in proceso %}
+            <div class="card tarea-card prioridad-{{ tarea.prioridad }}"
+                 data-prioridad="{{ tarea.prioridad }}"
+                 {% if tarea.fecha_limite < today %}style="border-left: 5px solid red;"{% endif %}>
+
+                <h3>{{ tarea.titulo }}</h3>
+                <p>{{ tarea.descripcion }}</p>
+                <p><strong>Prioridad:</strong> {{ tarea.prioridad }}</p>
+                <p><strong>Fecha:</strong> {{ tarea.fecha_limite }}</p>
+
+                {% if tarea.fecha_limite < today %}
+                <p style="color:red;"><strong>Vencida</strong></p>
+                {% endif %}
+
+                <a href="{{ url_for('main.cambiar_estado', id=tarea.id, nuevo='Completada') }}">Completar</a>
+                <a href="{{ url_for('main.editar', id=tarea.id) }}">Editar</a>
+                <a href="{{ url_for('main.eliminar', id=tarea.id) }}">Eliminar</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="columna">
+            <h2>Completada</h2>
+
+            {% for tarea in completadas %}
+            <div class="card tarea-card prioridad-{{ tarea.prioridad }}"
+                 data-prioridad="{{ tarea.prioridad }}">
+
+                <h3>{{ tarea.titulo }}</h3>
+                <p>{{ tarea.descripcion }}</p>
+                <p><strong>Prioridad:</strong> {{ tarea.prioridad }}</p>
+                <p><strong>Fecha:</strong> {{ tarea.fecha_limite }}</p>
+
+                <a href="{{ url_for('main.eliminar', id=tarea.id) }}">Eliminar</a>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function filtrar(prioridad) {
+    const cards = document.querySelectorAll(".tarea-card");
+    const botones = document.querySelectorAll(".filtros button");
+
+    botones.forEach(btn => btn.classList.remove("activo"));
+
+    const botonActivo = Array.from(botones).find(
+        btn => btn.textContent.trim() === prioridad
+    );
+
+    if (botonActivo) {
+        botonActivo.classList.add("activo");
+    }
+
+    cards.forEach(card => {
+        if (prioridad === "Todas") {
+            card.style.display = "block";
+        } else {
+            card.style.display =
+                card.dataset.prioridad === prioridad ? "block" : "none";
+        }
+    });
+}
+</script>
+
+{% endblock %}

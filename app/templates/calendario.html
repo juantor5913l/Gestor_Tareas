@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+<div class="contenedor">
+
+    <h1>Calendario de tareas</h1>
+
+    <div class="mini-calendar-box">
+        <div id="calendar"></div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const calendarEl = document.getElementById('calendar');
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        height: 420,
+
+        headerToolbar: {
+            left: 'prev,next',
+            center: 'title',
+            right: ''
+        },
+
+        dayMaxEvents: true,
+        displayEventTime: false,
+        eventDisplay: 'block',
+
+        events: {{ eventos|tojson }}
+    });
+
+    calendar.render();
+});
+</script>
+
+{% endblock %}
